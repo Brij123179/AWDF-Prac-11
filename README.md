@@ -350,3 +350,42 @@ curl http://localhost:5000/api/health
 - **Reflection (1 Mark)**: Documentation of troubleshooting scenarios and Docker storage volume persistence.
 - **Lab file evidence (1 Mark)**: Complete repository structure, bash/bat runner scripts, and comprehensive README documentation.
 
+---
+
+## 📸 Screenshots Gallery (`ss/`)
+
+### 1. Containerized Full-Stack Application Dashboard
+![Container Dashboard](ss/01_container_dashboard.png)
+*Full-stack application running on port 5173 with health indicators for all 3 Docker Compose services (frontend, backend, and mongodb).*
+
+---
+
+### 2. Multi-Container Build & Startup (`docker compose up --build`)
+![Docker Compose Terminal](ss/02_docker_compose_terminal.png)
+*Terminal showing multi-stage build execution, bridge network creation (`app-network`), named volume creation (`mongo-data`), and all 3 containers starting in parallel.*
+
+---
+
+### 3. Docker Service Status & Network Inspection (`docker compose ps`)
+![Docker PS & Network Inspection](ss/03_docker_ps_verification.png)
+*Verification showing `taskflow-mongodb`, `taskflow-backend`, and `taskflow-frontend` healthy on subnet `172.20.0.0/16` with internal DNS resolving `mongodb` to `172.20.0.2`.*
+
+---
+
+### 4. Backend Health Check & Database Connectivity
+![Backend Health Check](ss/04_backend_health_container.png)
+*Endpoint `http://localhost:5000/api/health` displaying active connection to `mongodb://mongodb:27017/taskdb` across the container bridge.*
+
+---
+
+### 5. Containerized Event Subsystem
+![Containerized Event Subsystem](ss/05_event_stream_containerized.png)
+*Event stream running inside Docker containers with persistence to MongoDB.*
+
+---
+
+### 6. Named Volume Data Persistence Verification
+![Persistent Volume Verification](ss/06_persistent_volume_test.png)
+*Terminal demonstration verifying Supplementary Problem 3: task records persist across `docker compose down` and `docker compose up` cycles via volume `taskflow-mongo-data`.*
+
+
