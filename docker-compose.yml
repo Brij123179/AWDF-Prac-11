@@ -1,0 +1,85 @@
+version: '3.8'
+
+# =============================================================================
+# CHAROTAR UNIVERSITY OF SCIENCE AND TECHNOLOGY (CHARUSAT)
+# Practical 11: Containerization with Docker and Docker Compose
+# Services Orchestrated:
+#   1. frontend: React 18 + Vite (built and served on port 5173)
+#   2. backend:  Node.js / Express REST API (port 5000)
+#   3. mongodb:  Official MongoDB 6.0 engine (port 27017)
+# Network: app-network (internal bridge)
+# Volume:  mongo-data (named volume for persistent database storage)
+# =============================================================================
+
+services:
+  # 1. Database Service (Official Mongo Container)
+  mongodb:
+    image: mongo:6.0
+    container_name: taskflow-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=taskdb
+    volumes:
+      # Named volume ensures data persistence across container restarts (Supplementary Problem 3)
+      - mongo-data:/data/db
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 2. Backend Service (Node.js / Express REST API)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: taskflow-backend
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=production
+      - PORT=5000
+      # Uses the Docker Compose service name 'mongodb' for DNS resolution (Core Step 5)
+      - MONGO_URI=mongodb://mongodb:27017/taskdb
+      - JWT_SECRET=supersecret_jwt_key_practical11_awdf_2026
+      - JWT_EXPIRE=2h
+      - EVENT_SIMULATED_DELAY_MS=2000
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  # 3. Frontend Service (React / Vite Built SPA)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: taskflow-frontend
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_BACKEND_URL=http://backend:5000
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+# Isolated bridge network for inter-container communication
+networks:
+  app-network:
+    name: app-network
+    driver: bridge
+
+# Named volume for persistent database storage
+volumes:
+  mongo-data:
+    name: taskflow-mongo-data
+    driver: local
+
